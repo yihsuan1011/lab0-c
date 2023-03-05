@@ -136,7 +136,7 @@ bool q_delete_dup(struct list_head *head)
     if (!head)
         return false;
     char *temp_val = NULL;
-    for (struct list_head **node = &head; *node;) {
+    for (struct list_head **node = &head->next; *node;) {
         element_t *current = list_entry(*node, element_t, list);
         if ((*node)->next) {
             if (strcmp(current->value,
@@ -157,6 +157,18 @@ bool q_delete_dup(struct list_head *head)
 void q_swap(struct list_head *head)
 {
     // https://leetcode.com/problems/swap-nodes-in-pairs/
+
+    for (struct list_head **node = &head->next; *node && (*node)->next;
+         node = &(*node)->next->next) {
+        struct list_head *first = *node, *second = (*node)->next,
+                         *third = (*node)->next->next;
+        first->next = (*node)->next->next;
+        second->next = *node;
+        first->prev = (*node)->next;
+        if (third)
+            third->prev = *node;
+        *node = second;
+    }
 }
 
 /* Reverse elements in queue */
