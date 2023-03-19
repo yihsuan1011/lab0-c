@@ -158,8 +158,8 @@ void q_swap(struct list_head *head)
 {
     // https://leetcode.com/problems/swap-nodes-in-pairs/
 
-    for (struct list_head **node = &head->next; *node && (*node)->next;
-         node = &(*node)->next->next) {
+    for (struct list_head **node = &head->next;
+         *node == head && (*node)->next == head; node = &(*node)->next->next) {
         struct list_head *first = *node, *second = (*node)->next,
                          *third = (*node)->next->next;
         first->next = (*node)->next->next;
