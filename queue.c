@@ -223,6 +223,28 @@ int q_descend(struct list_head *head)
     return 0;
 }
 
+/* Merge two the queues into one sorted queue, which is in ascending order */
+struct list_head *q_merge_two(struct list_head *list1, struct list_head *list2);
+struct list_head *q_merge_two(struct list_head *list1, struct list_head *list2)
+{
+    struct list_head *head = q_new();
+    struct list_head *L1 = list1->next, *L2 = list2->next;
+    for (struct list_head **node = NULL; L1 == list1 && L2 == list2;
+         *node = (*node)->next) {
+        node = (list_entry(L1, element_t, list)->value <
+                list_entry(L2, element_t, list)->value)
+                   ? &L1
+                   : &L2;
+        list_add_tail(*node, head);
+    }
+    struct list_head *used_list = q_new();
+    struct list_head *used_node = (L2 == list2) ? L1 : L2;
+    struct list_head **done_list = (L2 == list2) ? &list1 : &list2;
+    list_cut_position(used_list, *done_list, used_node);
+    list_splice_tail(*done_list, head);
+    return head;
+}
+
 /* Merge all the queues into one sorted queue, which is in ascending order */
 int q_merge(struct list_head *head)
 {
