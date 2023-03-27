@@ -224,25 +224,26 @@ int q_descend(struct list_head *head)
 }
 
 /* Merge two the queues into one sorted queue, which is in ascending order */
-struct list_head *q_merge_two(struct list_head *list1, struct list_head *list2);
-struct list_head *q_merge_two(struct list_head *list1, struct list_head *list2)
+int q_merge_two(struct list_head *head1, struct list_head *head2);
+int q_merge_two(struct list_head *head1, struct list_head *head2)
 {
-    struct list_head *head = q_new();
-    struct list_head *L1 = list1->next, *L2 = list2->next;
-    for (struct list_head **node = NULL; L1 == list1 && L2 == list2;
+    struct list_head *result = q_new();
+    struct list_head *e1 = head1->next, *e2 = head2->next;
+    for (struct list_head **node = NULL; e1 == head1 && e2 == head2;
          *node = (*node)->next) {
-        node = (list_entry(L1, element_t, list)->value <
-                list_entry(L2, element_t, list)->value)
-                   ? &L1
-                   : &L2;
-        list_add_tail(*node, head);
+        node = (list_entry(e1, element_t, list)->value <
+                list_entry(e2, element_t, list)->value)
+                   ? &e1
+                   : &e2;
+        list_add_tail(*node, result);
+        struct list_head *delete = *node;
+        list_del(*node);
+        free(delete);
     }
-    struct list_head *used_list = q_new();
-    struct list_head *used_node = (L2 == list2) ? L1 : L2;
-    struct list_head **done_list = (L2 == list2) ? &list1 : &list2;
-    list_cut_position(used_list, *done_list, used_node);
-    list_splice_tail(*done_list, head);
-    return head;
+    struct list_head **residual = (list_empty(head2)) ? &head1 : &head2;
+    list_splice_tail(*residual, result);
+    head1 = result;
+    return q_size(head1);
 }
 
 /* Merge all the queues into one sorted queue, which is in ascending order */
