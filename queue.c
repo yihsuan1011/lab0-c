@@ -253,5 +253,23 @@ int q_merge_two(struct list_head *head)
 int q_merge(struct list_head *head)
 {
     // https://leetcode.com/problems/merge-k-sorted-lists/
-    return 0;
+    if (!head || list_empty(head))
+        return 0;
+    if (head->next == head->prev)
+        return list_first_entry(head, queue_contex_t, chain)->size;
+
+    int m = q_size(head) / 2;
+    struct list_head *mid = head;
+    for (int i = 0; i < m; i++) {
+        mid = mid->next;
+    }
+
+    struct list_head *left = q_new();
+    list_cut_position(left, head, mid);
+    // head will become right half
+    q_merge(left);
+    q_merge(head);
+    list_splice_init(left, head);
+
+    return q_merge_two(head);
 }
