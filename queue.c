@@ -214,8 +214,16 @@ void q_reverseK(struct list_head *head, int k)
     q_reverseK(cur->next, k);
 }
 
-/* Sort elements of queue in ascending order */
-void q_sort(struct list_head *head) {}
+/* Sort elements of queue in ascending/descending order */
+void q_sort(struct list_head *head, bool descend) {}
+
+/* Remove every node which has a node with a strictly less value anywhere to
+ * the right side of it */
+int q_ascend(struct list_head *head)
+{
+    // https://leetcode.com/problems/remove-nodes-from-linked-list/
+    return 0;
+}
 
 /* Remove every node which has a node with a strictly greater value anywhere to
  * the right side of it */
@@ -251,8 +259,9 @@ int q_merge_two(struct list_head *head)
     return q_size(q1->q);
 }
 
-/* Merge all the queues into one sorted queue, which is in ascending order */
-int q_merge(struct list_head *head)
+/* Merge all the queues into one sorted queue, which is in ascending/descending
+ * order */
+int q_merge(struct list_head *head, bool descend)
 {
     // https://leetcode.com/problems/merge-k-sorted-lists/
     if (!head || list_empty(head))
@@ -269,8 +278,8 @@ int q_merge(struct list_head *head)
     struct list_head *left = q_new();
     list_cut_position(left, head, mid);
     // head will become right half
-    q_merge(left);
-    q_merge(head);
+    q_merge(left, 0);
+    q_merge(head, 0);
     list_splice_init(left, head);
 
     return q_merge_two(head);
