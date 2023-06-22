@@ -256,19 +256,17 @@ int q_merge(struct list_head *head, bool descend)
     if (head->next == head->prev)
         return list_first_entry(head, queue_contex_t, chain)->size;
 
-    int m = q_size(head) / 2;
-    struct list_head *mid = head;
-    for (int i = 0; i < m; i++) {
-        mid = mid->next;
+    queue_contex_t *first = list_first_entry(head, queue_contex_t, chain);
+    queue_contex_t *curr, *safe;
+    int size = 0;
+
+    list_for_each_entry_safe (curr, safe, head, chain) {
+        if (curr != first) {
+            size = q_merge_two(first->q, curr->q);
+            curr->q = NULL;
+        }
+
     }
 
-    struct list_head *left = q_new();
-    list_cut_position(left, head, mid);
-    // head will become right half
-    q_merge(left, 0);
-    q_merge(head, 0);
-    list_splice_init(left, head);
-
-    // return q_merge_two(head);
-    return 0;
+    return size;
 }
