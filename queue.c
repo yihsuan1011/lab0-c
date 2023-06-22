@@ -136,21 +136,21 @@ bool q_delete_dup(struct list_head *head)
 
     if (!head)
         return false;
-    char *temp_val = NULL;
-    for (struct list_head **node = &head->next; *node;) {
-        element_t *current = list_entry(*node, element_t, list);
-        if ((*node)->next) {
-            if (strcmp(current->value,
-                       list_entry((*node)->next, element_t, list)->value) == 0)
-                temp_val = strdup(current->value);
+
+    element_t *curr, *next;
+    bool dup = 0;
+    list_for_each_entry_safe (curr, next, head, list) {
+        if (&next->list != head && strcmp(curr->value, next->value) == 0) {
+            list_del(&curr->list);
+            q_release_element(curr);
+            dup = 1;
+        } else if (dup) {
+            list_del(&curr->list);
+            q_release_element(curr);
+            dup = 1;
         }
-        if (strcmp(current->value, temp_val) == 0) {
-            struct list_head *delete = *node;
-            list_del(*node);
-            free(delete);
-        } else
-            node = &(*node)->next;
     }
+
     return true;
 }
 
