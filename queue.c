@@ -189,26 +189,22 @@ void q_reverseK(struct list_head *head, int k)
 {
     // https://leetcode.com/problems/reverse-nodes-in-k-group/
 
-    struct list_head *cur = head->next;
-    struct list_head *last = head->next;
-    for (int i = 0; i < k; i++) {
-        if (last == head)
-            return;
-        last = last->next;
-    }
+    if (!head || list_empty(head))
+        return;
 
-    struct list_head *node = cur, *tmp = NULL;
-    for (int i = 0; /*node->next &&*/ i < k; i++) {
-        tmp = node->next;
-        node->next = node->prev;
-        node->prev = tmp;
-        node = node->prev;
+    int count = 0;
+    struct list_head sub_q, *node, *safe, *tmp = head;
+    list_for_each_safe (node, safe, head) {
+        count++;
+        if (count == k) {
+            INIT_LIST_HEAD(&sub_q);
+            list_cut_position(&sub_q, tmp, node);
+            q_reverse(&sub_q);
+            list_splice_init(&sub_q, tmp);
+            count = 0;
+            tmp = safe->prev;
+        }
     }
-    tmp = cur->next;
-    cur->next = last->prev;
-    last->prev = tmp;
-
-    q_reverseK(cur->next, k);
 }
 
 /* Sort elements of queue in ascending/descending order */
@@ -231,29 +227,23 @@ int q_descend(struct list_head *head)
 }
 
 /* Merge two the queues into one sorted queue, which is in ascending order */
-int q_merge_two(struct list_head *head);
-int q_merge_two(struct list_head *head)
+int q_merge_two(struct list_head *q1, struct list_head *q2);
+int q_merge_two(struct list_head *q1, struct list_head *q2)
 {
     struct list_head *result = q_new();
-    queue_contex_t *q1 = list_first_entry(head, queue_contex_t, chain);
-    queue_contex_t *q2 = list_entry(q1->chain.next, queue_contex_t, chain);
-    struct list_head *e1 = q1->q->next, *e2 = q2->q->next;
-    for (struct list_head **node = NULL; e1 == q1->q && e2 == q2->q;
-         *node = (*node)->next) {
-        node = (list_entry(e1, element_t, list)->value <
-                list_entry(e2, element_t, list)->value)
-                   ? &e1
-                   : &e2;
-        list_add_tail(*node, result);
-        struct list_head *delete = *node;
-        list_del(*node);
-        free(delete);
+    element_t *node;
+    int i = 0;
+    for (; !list_empty(q1) && !list_empty(q2); i++) {
+        element_t *e1 = list_first_entry(q1, element_t, list);
+        element_t *e2 = list_first_entry(q2, element_t, list);
+        node = (strcmp(e1->value, e2->value) < 0) ? e1 : e2;
+        list_move_tail(&node->list, result);
     }
-    struct list_head **residual = (list_empty(q2->q)) ? &q1->q : &q2->q;
-    list_splice_tail(*residual, head);
-    q1->q = result;
-    list_del(&q2->chain);
-    return q_size(q1->q);
+    struct list_head *residual = (list_empty(q2)) ? q1 : q2;
+    i += q_size(residual);
+    list_splice_tail_init(residual, result);
+    list_splice(result, q1);
+    return i;
 }
 
 /* Merge all the queues into one sorted queue, which is in ascending/descending
@@ -279,5 +269,6 @@ int q_merge(struct list_head *head, bool descend)
     q_merge(head, 0);
     list_splice_init(left, head);
 
-    return q_merge_two(head);
+    // return q_merge_two(head);
+    return 0;
 }
