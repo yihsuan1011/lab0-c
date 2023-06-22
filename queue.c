@@ -124,9 +124,8 @@ bool q_delete_mid(struct list_head *head)
     struct list_head *fast = head, *slow = head;
     for (; fast && fast->next; fast = fast->next->next)
         slow = slow->next;
-    struct list_head *delete = slow;
     list_del(slow);
-    free(delete);
+    q_release_element(list_entry(slow, element_t, list));
     return true;
 }
 
