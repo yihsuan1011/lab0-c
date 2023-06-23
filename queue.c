@@ -56,7 +56,11 @@ bool q_insert_tail(struct list_head *head, char *s)
 {
     if (!head)
         return false;
-    return q_insert_head(head->prev, s);
+
+    if (list_empty(head))
+        return q_insert_head(head, s);
+    else
+        return q_insert_head(head->prev, s);
 }
 
 /* Remove an element from head of queue */
