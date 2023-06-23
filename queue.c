@@ -73,7 +73,7 @@ element_t *q_remove_head(struct list_head *head, char *sp, size_t bufsize)
         strncpy(sp, target->value, bufsize - 1);
         sp[bufsize - 1] = '\0';
     }
-    list_del(&target->list);
+    list_del_init(head->next);
     return target;
 }
 
@@ -87,7 +87,7 @@ element_t *q_remove_tail(struct list_head *head, char *sp, size_t bufsize)
         strncpy(sp, target->value, bufsize - 1);
         sp[bufsize - 1] = '\0';
     }
-    list_del(&target->list);
+    list_del_init(head->prev);
     return target;
 }
 
@@ -246,7 +246,7 @@ void q_sort(struct list_head *head, bool descend)
         mid = mid->next;
 
     struct list_head left;
-    // INIT_LIST_HEAD(&left);
+    INIT_LIST_HEAD(&left);
     list_cut_position(&left, head, mid);
     // head will become right half
     q_merge(&left, descend);
