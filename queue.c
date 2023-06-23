@@ -169,15 +169,9 @@ void q_reverse(struct list_head *head)
     if (!head || list_empty(head))
         return;
 
-    struct list_head *node, *safe, *tmp;
-    list_for_each_safe (node, safe, head) {
-        tmp = node->next;
-        node->next = node->prev;
-        node->prev = tmp;
-    }
-    tmp = head->next;
-    head->next = head->prev;
-    head->prev = tmp;
+    struct list_head *node, *safe;
+    list_for_each_safe (node, safe, head)
+        list_move(node, head);
 }
 
 /* Reverse the nodes of the list k at a time */
