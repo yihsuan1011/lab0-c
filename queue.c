@@ -66,11 +66,8 @@ element_t *q_remove_head(struct list_head *head, char *sp, size_t bufsize)
         return NULL;
     element_t *target = list_first_entry(head, element_t, list);
     if (sp) {
-        if (strlen(target->value) > (bufsize - 1))
-            strncpy(sp, target->value, bufsize - 1);
-        else
-            sp = strdup(target->value);
-        strcat(sp, "\0");
+        strncpy(sp, target->value, bufsize - 1);
+        sp[bufsize - 1] = '\0';
     }
     list_del(&target->list);
     return target;
