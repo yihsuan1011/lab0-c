@@ -66,7 +66,7 @@ bool q_insert_tail(struct list_head *head, char *s)
 /* Remove an element from head of queue */
 element_t *q_remove_head(struct list_head *head, char *sp, size_t bufsize)
 {
-    if (!head || head->next == head)
+    if (!head || list_empty(head))
         return NULL;
     element_t *target = list_first_entry(head, element_t, list);
     if (sp) {
@@ -80,7 +80,7 @@ element_t *q_remove_head(struct list_head *head, char *sp, size_t bufsize)
 /* Remove an element from tail of queue */
 element_t *q_remove_tail(struct list_head *head, char *sp, size_t bufsize)
 {
-    if (!head || head->next == head)
+    if (!head || list_empty(head))
         return NULL;
     element_t *target = list_last_entry(head, element_t, list);
     if (sp) {
@@ -209,27 +209,29 @@ void q_merge_two(struct list_head *q1, struct list_head *q2, bool descend)
 {
     if (!q1 || !q2)
         return;
-    struct list_head *result = q_new();
+
+    struct list_head result;
+    INIT_LIST_HEAD(&result);
     element_t *node;
     if (descend) {
         while (!list_empty(q1) && !list_empty(q2)) {
             element_t *e1 = list_first_entry(q1, element_t, list);
             element_t *e2 = list_first_entry(q2, element_t, list);
             node = (strcmp(e1->value, e2->value) > 0) ? e1 : e2;
-            list_move_tail(&node->list, result);
+            list_move_tail(&node->list, &result);
         }
     } else {
         while (!list_empty(q1) && !list_empty(q2)) {
             element_t *e1 = list_first_entry(q1, element_t, list);
             element_t *e2 = list_first_entry(q2, element_t, list);
             node = (strcmp(e1->value, e2->value) < 0) ? e1 : e2;
-            list_move_tail(&node->list, result);
+            list_move_tail(&node->list, &result);
         }
     }
 
     struct list_head *residual = (list_empty(q2)) ? q1 : q2;
-    list_splice_tail_init(residual, result);
-    list_splice(result, q1);
+    list_splice_tail_init(residual, &result);
+    list_splice(&result, q1);
 }
 
 /* Sort elements of queue in ascending/descending order */
@@ -243,12 +245,13 @@ void q_sort(struct list_head *head, bool descend)
          fast != head && fast->next != head; fast = fast->next->next)
         mid = mid->next;
 
-    struct list_head *left = q_new();
-    list_cut_position(left, head, mid);
+    struct list_head left;
+    // INIT_LIST_HEAD(&left);
+    list_cut_position(&left, head, mid);
     // head will become right half
-    q_merge(left, descend);
+    q_merge(&left, descend);
     q_merge(head, descend);
-    q_merge_two(head, left, descend);
+    q_merge_two(head, &left, descend);
 }
 
 /* Remove every node which has a node with a strictly less value anywhere to
