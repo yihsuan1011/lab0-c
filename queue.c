@@ -149,12 +149,14 @@ void q_swap(struct list_head *head)
 {
     // https://leetcode.com/problems/swap-nodes-in-pairs/
 
-    if (!head)
+    if (!head || list_empty(head))
         return;
 
     for (struct list_head *node = head->next;
-         node != head && node->next != head; node = node->next)
-        list_move(node, node->next);
+         node != head && node->next != head; node = node->next) {
+        struct list_head *tmp = node;
+        list_move(node, tmp->next);
+    }
 }
 
 /* Reverse elements in queue */
