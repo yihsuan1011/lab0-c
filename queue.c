@@ -184,10 +184,10 @@ void q_reverseK(struct list_head *head, int k)
 
     int count = 0;
     struct list_head sub_q, *node, *safe, *tmp = head;
+    INIT_LIST_HEAD(&sub_q);
     list_for_each_safe (node, safe, head) {
         count++;
         if (count == k) {
-            INIT_LIST_HEAD(&sub_q);
             list_cut_position(&sub_q, tmp, node);
             q_reverse(&sub_q);
             list_splice_init(&sub_q, tmp);
