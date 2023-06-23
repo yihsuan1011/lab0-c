@@ -200,19 +200,29 @@ void q_reverseK(struct list_head *head, int k)
 }
 
 /* Merge two the queues into one sorted queue, which is in ascending order */
-void q_merge_two(struct list_head *q1, struct list_head *q2);
-void q_merge_two(struct list_head *q1, struct list_head *q2)
+void q_merge_two(struct list_head *q1, struct list_head *q2, bool descend);
+void q_merge_two(struct list_head *q1, struct list_head *q2, bool descend)
 {
     if (!q1 || !q2)
         return;
     struct list_head *result = q_new();
     element_t *node;
-    while (!list_empty(q1) && !list_empty(q2)) {
-        element_t *e1 = list_first_entry(q1, element_t, list);
-        element_t *e2 = list_first_entry(q2, element_t, list);
-        node = (strcmp(e1->value, e2->value) < 0) ? e1 : e2;
-        list_move_tail(&node->list, result);
+    if (descend) {
+        while (!list_empty(q1) && !list_empty(q2)) {
+            element_t *e1 = list_first_entry(q1, element_t, list);
+            element_t *e2 = list_first_entry(q2, element_t, list);
+            node = (strcmp(e1->value, e2->value) > 0) ? e1 : e2;
+            list_move_tail(&node->list, result);
+        }
+    } else {
+        while (!list_empty(q1) && !list_empty(q2)) {
+            element_t *e1 = list_first_entry(q1, element_t, list);
+            element_t *e2 = list_first_entry(q2, element_t, list);
+            node = (strcmp(e1->value, e2->value) < 0) ? e1 : e2;
+            list_move_tail(&node->list, result);
+        }
     }
+
     struct list_head *residual = (list_empty(q2)) ? q1 : q2;
     list_splice_tail_init(residual, result);
     list_splice(result, q1);
@@ -232,9 +242,9 @@ void q_sort(struct list_head *head, bool descend)
     struct list_head *left = q_new();
     list_cut_position(left, head, mid);
     // head will become right half
-    q_merge(left, 0);
-    q_merge(head, 0);
-    q_merge_two(head, left);
+    q_merge(left, descend);
+    q_merge(head, descend);
+    q_merge_two(head, left, descend);
 }
 
 /* Remove every node which has a node with a strictly less value anywhere to
@@ -294,7 +304,7 @@ int q_merge(struct list_head *head, bool descend)
 
     list_for_each_entry_safe (curr, safe, head, chain) {
         if (curr != first) {
-            q_merge_two(first->q, curr->q);
+            q_merge_two(first->q, curr->q, descend);
             curr->q = NULL;
         }
     }
