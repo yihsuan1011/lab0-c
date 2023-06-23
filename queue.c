@@ -117,9 +117,9 @@ bool q_delete_mid(struct list_head *head)
         front = front->next;
         back = back->prev;
     }
-
-    list_del(front);
-    q_release_element(list_entry(front, element_t, list));
+    element_t *node = list_entry(back, element_t, list);
+    list_del(&node->list);
+    q_release_element(node);
     return true;
 }
 
