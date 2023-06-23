@@ -200,23 +200,22 @@ void q_reverseK(struct list_head *head, int k)
 }
 
 /* Merge two the queues into one sorted queue, which is in ascending order */
-int q_merge_two(struct list_head *q1, struct list_head *q2);
-int q_merge_two(struct list_head *q1, struct list_head *q2)
+void q_merge_two(struct list_head *q1, struct list_head *q2);
+void q_merge_two(struct list_head *q1, struct list_head *q2)
 {
+    if (!q1 || !q2)
+        return;
     struct list_head *result = q_new();
     element_t *node;
-    int i = 0;
-    for (; !list_empty(q1) && !list_empty(q2); i++) {
+    while (!list_empty(q1) && !list_empty(q2)) {
         element_t *e1 = list_first_entry(q1, element_t, list);
         element_t *e2 = list_first_entry(q2, element_t, list);
         node = (strcmp(e1->value, e2->value) < 0) ? e1 : e2;
         list_move_tail(&node->list, result);
     }
     struct list_head *residual = (list_empty(q2)) ? q1 : q2;
-    i += q_size(residual);
     list_splice_tail_init(residual, result);
     list_splice(result, q1);
-    return i;
 }
 
 /* Sort elements of queue in ascending/descending order */
@@ -292,14 +291,13 @@ int q_merge(struct list_head *head, bool descend)
 
     queue_contex_t *first = list_first_entry(head, queue_contex_t, chain);
     queue_contex_t *curr, *safe;
-    int size = 0;
 
     list_for_each_entry_safe (curr, safe, head, chain) {
         if (curr != first) {
-            size = q_merge_two(first->q, curr->q);
+            q_merge_two(first->q, curr->q);
             curr->q = NULL;
         }
     }
 
-    return size;
+    return q_size(first->q);
 }
