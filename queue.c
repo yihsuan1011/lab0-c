@@ -207,25 +207,6 @@ void q_reverseK(struct list_head *head, int k)
     }
 }
 
-/* Sort elements of queue in ascending/descending order */
-void q_sort(struct list_head *head, bool descend) {}
-
-/* Remove every node which has a node with a strictly less value anywhere to
- * the right side of it */
-int q_ascend(struct list_head *head)
-{
-    // https://leetcode.com/problems/remove-nodes-from-linked-list/
-    return 0;
-}
-
-/* Remove every node which has a node with a strictly greater value anywhere to
- * the right side of it */
-int q_descend(struct list_head *head)
-{
-    // https://leetcode.com/problems/remove-nodes-from-linked-list/
-    return 0;
-}
-
 /* Merge two the queues into one sorted queue, which is in ascending order */
 int q_merge_two(struct list_head *q1, struct list_head *q2);
 int q_merge_two(struct list_head *q1, struct list_head *q2)
@@ -244,6 +225,41 @@ int q_merge_two(struct list_head *q1, struct list_head *q2)
     list_splice_tail_init(residual, result);
     list_splice(result, q1);
     return i;
+}
+
+/* Sort elements of queue in ascending/descending order */
+void q_sort(struct list_head *head, bool descend)
+{
+    if (!head || list_empty(head) || head->next == head->prev)
+        return;
+
+    struct list_head *mid = head;
+    for (struct list_head *fast = head->next;
+         fast != head && fast->next != head; fast = fast->next->next)
+        mid = mid->next;
+
+    struct list_head *left = q_new();
+    list_cut_position(left, head, mid);
+    // head will become right half
+    q_merge(left, 0);
+    q_merge(head, 0);
+    q_merge_two(head, left);
+}
+
+/* Remove every node which has a node with a strictly less value anywhere to
+ * the right side of it */
+int q_ascend(struct list_head *head)
+{
+    // https://leetcode.com/problems/remove-nodes-from-linked-list/
+    return 0;
+}
+
+/* Remove every node which has a node with a strictly greater value anywhere to
+ * the right side of it */
+int q_descend(struct list_head *head)
+{
+    // https://leetcode.com/problems/remove-nodes-from-linked-list/
+    return 0;
 }
 
 /* Merge all the queues into one sorted queue, which is in ascending/descending
@@ -265,7 +281,6 @@ int q_merge(struct list_head *head, bool descend)
             size = q_merge_two(first->q, curr->q);
             curr->q = NULL;
         }
-
     }
 
     return size;
