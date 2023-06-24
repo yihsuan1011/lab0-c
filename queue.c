@@ -243,8 +243,8 @@ void q_sort(struct list_head *head, bool descend)
     INIT_LIST_HEAD(&left);
     list_cut_position(&left, head, mid);
     // head will become right half
-    q_merge(&left, descend);
-    q_merge(head, descend);
+    q_sort(&left, descend);
+    q_sort(head, descend);
     q_merge_two(head, &left, descend);
 }
 
